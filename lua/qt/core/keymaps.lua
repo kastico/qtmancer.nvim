@@ -41,6 +41,9 @@ local specs = {
   { "Cs", "select_cxx_standard", "Select C++ standard", { full = true } },
   { "Cr", "reconfigure_project", "Reconfigure project", { full = true } },
 
+  { "k", function() require("qt.docs").open_cursor() end, "Docs: symbol / selection", { modes = { "n", "x" } } },
+  { "K", function() require("qt.docs").prompt() end, "Docs: search" },
+
   -- buffer-local (override the global ones above)
   { "d", function(qt, f) qt.open_designer(f) end, "Open this file in Designer",
     { ctx = { "%.ui$" }, where = ".ui" } },
@@ -89,7 +92,7 @@ function M.setup(qt)
     if opts.ctx then
       table.insert(buffer_specs, spec)
     elseif o.full or not opts.full then
-      vim.keymap.set("n", o.prefix .. spec[1], runner(qt, spec), { desc = "Qt: " .. spec[3] })
+      vim.keymap.set(opts.modes or "n", o.prefix .. spec[1], runner(qt, spec), { desc = "Qt: " .. spec[3] })
     end
   end
 
