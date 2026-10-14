@@ -294,7 +294,12 @@ end, { desc = 'Show Qt debug configuration status' })
 
 vim.api.nvim_create_user_command('QtDebugSetup', function()
     if not ensure_loaded() then return end
-    require('qt.debug').setup_debugging()
+    local ok, dbg = pcall(require, 'qt.debug')
+    if not ok then
+        vim.notify('Qt: debug module is not implemented yet', vim.log.levels.WARN)
+        return
+    end
+    dbg.setup_debugging()
 end, { desc = 'Setup complete Qt debugging environment' })
 
 -- ==================== Help ====================

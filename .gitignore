@@ -28,9 +28,6 @@ temp/
 # Lua字节码
 *.luac
 
-# 调试文件
-debug.lua
 
 # 本地配置
 local_config.lua
-EOF < /dev/null
