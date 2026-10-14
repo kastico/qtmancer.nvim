@@ -86,7 +86,8 @@ function M.setup(user_config)
         keymaps = {
             -- "minimal": only the documented essentials
             -- "full": includes extra convenience keymaps (legacy)
-            preset = "minimal"
+            preset = "minimal",
+            prefix = "<leader>Q",
         }
     }
     
