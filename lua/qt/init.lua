@@ -124,7 +124,7 @@ end
 function M.quick_build_and_run()
 	vim.notify("🚀 Quick Build & Run...", vim.log.levels.INFO)
 	
-	local build_manager = require("qt.build_manager")
+	local build_manager = require("qt.build.build_manager")
 	
 	-- Build first, then run on success
 	vim.schedule(function()
@@ -228,7 +228,7 @@ function M.new_project_interactive()
 				if not choice or not idx then
 					return
 				end
-				local project_manager = require('qt.project_manager')
+				local project_manager = require('qt.create.project')
 				project_manager.new_project_interactive_preset(name, types[idx])
 			end)
 		end
@@ -248,8 +248,8 @@ function M.open_project_interactive()
 		end)
 	end
 
-	local history = require("qt.history")
-	local project_manager = require("qt.project_manager")
+	local history = require("qt.core.history")
+	local project_manager = require("qt.create.project")
 
 	local recent = history.get_recent_projects()
 	local discovered = project_manager.discover_projects({ limit = 20 })
@@ -316,12 +316,12 @@ function M.open_project_interactive()
 end
 
 function M.new_project(name, template_type, root_dir)
-	local project_manager = require("qt.project_manager")
+	local project_manager = require("qt.create.project")
 	project_manager.new_project(name, template_type, nil, root_dir)
 end
 
 function M.open_project(path)
-	local project_manager = require("qt.project_manager")
+	local project_manager = require("qt.create.project")
 	return project_manager.open_project(path)
 end
 
@@ -409,7 +409,7 @@ function M.create_class(class_name, class_type, options)
 		return
 	end
 
-	local core = require("qt.core")
+	local core = require("qt.create.class")
 	local success, error_msg = core.create_qt_class(class_name, class_type, options or {})
 
 	if success then
@@ -420,12 +420,12 @@ function M.create_class(class_name, class_type, options)
 end
 
 function M.create_class_from_ui(ui_file, class_name)
-	local core = require("qt.core")
+	local core = require("qt.create.class")
 	local designer = require("qt.designer")
 	
 	-- Find UI file
 	local project_root = M._config.project_root
-	local system = require('qt.system')
+	local system = require('qt.core.system')
 	
 	local ui_file_path = nil
 	if ui_file:match("^/") then
@@ -480,7 +480,7 @@ function M.create_class_from_ui(ui_file, class_name)
 		
 		-- Update CMakeLists.txt if enabled
 		if M._config.auto_update_cmake then
-			local cmake = require("qt.cmake")
+			local cmake = require("qt.build.cmake")
 			cmake.add_ui_file(ui_file_path)
 		end
 	else
@@ -492,22 +492,22 @@ end
 
 -- Build Management
 function M.build_project()
-	local build_manager = require("qt.build_manager")
+	local build_manager = require("qt.build.build_manager")
 	build_manager.build_project()
 end
 
 function M.run_project()
-	local build_manager = require("qt.build_manager")
+	local build_manager = require("qt.build.build_manager")
 	build_manager.run_project()
 end
 
 function M.install_project(prefix)
-	local build_manager = require("qt.build_manager")
+	local build_manager = require("qt.build.build_manager")
 	build_manager.install_project(prefix)
 end
 
 function M.package_project()
-	local build_manager = require("qt.build_manager")
+	local build_manager = require("qt.build.build_manager")
 	build_manager.package_project()
 end
 
@@ -562,8 +562,8 @@ end
 
 -- Compile UI file with uic (enhanced error handling)
 function M.compile_ui_file(ui_file_path)
-	local system = require('qt.system')
-	local file_manager = require('qt.file_manager')
+	local system = require('qt.core.system')
+	local file_manager = require('qt.core.file_manager')
 	
 	-- Validate input
 	if not ui_file_path or ui_file_path == "" then
@@ -806,7 +806,7 @@ function M.new_project_quick()
 		end
 
 		local target_root = dir_input ~= '' and vim.fs.normalize(dir_input) or base_dir
-		local project_manager = require('qt.project_manager')
+		local project_manager = require('qt.create.project')
 		project_manager.new_project(project_name, "widget_app", "17", target_root)
 	end)
 end
@@ -820,7 +820,7 @@ function M.build_with_std(cxx_standard)
 		vim.fn.system(cmd)
 	else
 		-- Unix: use cmake directly
-		local build_manager = require('qt.build_manager')
+		local build_manager = require('qt.build.build_manager')
 		build_manager.build_project()
 		vim.notify(string.format("Building with C++%s...", cxx_standard), vim.log.levels.INFO)
 	end
@@ -936,9 +936,9 @@ end
 -- Generate project documentation
 -- 生成项目文档
 function M.generate_documentation(doc_type, output_file)
-	local templates = require('qt.templates')
+	local templates = require('qt.create.templates')
 	templates.init()
-	local file_manager = require('qt.file_manager')
+	local file_manager = require('qt.core.file_manager')
 	
 	doc_type = doc_type or "project_doc"
 	
@@ -975,7 +975,7 @@ function M.generate_documentation(doc_type, output_file)
 		local project_root = file_manager.get_project_root()
 		
 		-- Ensure docs directory exists
-		local doc_path = require('qt.system').join_path(project_root, doc_dir)
+		local doc_path = require('qt.core.system').join_path(project_root, doc_dir)
 		if vim.fn.isdirectory(doc_path) == 0 then
 			vim.fn.mkdir(doc_path, "p")
 		end
@@ -987,7 +987,7 @@ function M.generate_documentation(doc_type, output_file)
 			third_party_lib_doc = "THIRD_PARTY.md"
 		}
 		
-		output_file = require('qt.system').join_path(doc_path, filename_map[doc_type] or "README.md")
+		output_file = require('qt.core.system').join_path(doc_path, filename_map[doc_type] or "README.md")
 	end
 	
 	-- Write documentation
@@ -1046,7 +1046,7 @@ function M.add_third_party_library()
 					}
 					
 					-- Add to CMakeLists.txt
-					local cmake = require('qt.cmake')
+					local cmake = require('qt.build.cmake')
 					local success = cmake.add_third_party_library(lib_name, lib_config)
 					
 					if success then
@@ -1061,7 +1061,7 @@ end
 -- Create third-party CMake configuration file
 -- 创建第三方库CMake配置文件
 function M.create_third_party_cmake()
-	local cmake = require('qt.cmake')
+	local cmake = require('qt.build.cmake')
 	cmake.create_third_party_cmake_file()
 end
 

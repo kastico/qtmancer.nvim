@@ -2,9 +2,9 @@
 -- 项目管理模块
 
 local M = {}
-local file_manager = require('qt.file_manager')
-local history = require('qt.history')
-local system = require('qt.system')
+local file_manager = require('qt.core.file_manager')
+local history = require('qt.core.history')
+local system = require('qt.core.system')
 
 -- Project templates
 local project_templates = {
@@ -331,7 +331,7 @@ end
 
 -- Create project files
 function M.create_project_files(project_path, template_type, project_name, cxx_standard, opts)
-    local templates = require('qt.templates')
+    local templates = require('qt.create.templates')
     templates.init()
 
     opts = opts or {}
@@ -461,7 +461,7 @@ end
 
 -- Generate template file content
 function M.generate_template_file(file_name, template_type, vars)
-    local templates = require('qt.templates')
+    local templates = require('qt.create.templates')
     
     local template_map = {
         ["main.cpp"] = template_type == "widget_app" and "main_widget_app" or
@@ -752,7 +752,7 @@ end
 
 -- Create module files
 function M.create_module_files(module_path, module_type, module_name, opts)
-    local templates = require('qt.templates')
+    local templates = require('qt.create.templates')
     templates.init()
 
     opts = opts or {}
@@ -875,7 +875,7 @@ end
 
 -- Generate library header template
 function M.generate_library_header(module_name, module_type, template_vars)
-    local templates = require('qt.templates')
+    local templates = require('qt.create.templates')
     local vars = vim.tbl_extend("force", template_vars or {}, {
         HEADER_GUARD = (template_vars and template_vars.HEADER_GUARD) or (string.upper(module_name) .. "_H"),
         PLUGIN_IID = "org.example." .. module_name,
@@ -891,7 +891,7 @@ end
 
 -- Generate library source template
 function M.generate_library_source(module_name, module_type, template_vars)
-    local templates = require('qt.templates')
+    local templates = require('qt.create.templates')
     local vars = vim.tbl_extend("force", template_vars or {}, {
         PLUGIN_IID = "org.example." .. module_name
     })

@@ -79,7 +79,7 @@ function M.show_main_interface()
         -- 项目管理
         ['p'] = function()
             vim.api.nvim_win_close(win, true)
-            require('qt.project_manager').new_project_interactive()
+            require('qt.create.project').new_project_interactive()
         end,
         ['P'] = function()
             vim.api.nvim_win_close(win, true)
@@ -495,7 +495,7 @@ function M.create_class_with_options(class_name, class_type, options)
     vim.notify("Creating " .. class_type .. " class: " .. class_name, vim.log.levels.INFO)
     
     -- 延迟加载core模块以避免循环依赖
-    local ok, core = pcall(require, 'qt.core')
+    local ok, core = pcall(require, 'qt.create.class')
     if not ok then
         vim.notify('Error loading qt.core: ' .. tostring(core), vim.log.levels.ERROR)
         return
@@ -521,8 +521,8 @@ end
 
 -- 打开创建的文件
 function M.open_created_files(class_name, class_type, options)
-    local file_manager = require('qt.file_manager')
-    local system = require('qt.system')
+    local file_manager = require('qt.core.file_manager')
+    local system = require('qt.core.system')
     local target_dirs = file_manager.determine_target_directories(class_type, options)
     local filename = file_manager.class_name_to_filename(class_name)
     
@@ -562,7 +562,7 @@ end
 
 -- 显示项目管理界面
 function M.show_project_manager()
-    local project_manager = require('qt.project_manager')
+    local project_manager = require('qt.create.project')
     local current_project = project_manager.get_current_project()
     
     local menu_items = {}
@@ -656,17 +656,17 @@ function M.show_project_manager()
         end,
         ['4'] = function()
             close_window()
-            local build_manager = require('qt.build_manager')
+            local build_manager = require('qt.build.build_manager')
             build_manager.build_project()
         end,
         ['5'] = function()
             close_window()
-            local build_manager = require('qt.build_manager')
+            local build_manager = require('qt.build.build_manager')
             build_manager.run_project()
         end,
         ['6'] = function()
             close_window()
-            local build_manager = require('qt.build_manager')
+            local build_manager = require('qt.build.build_manager')
             build_manager.clean_project()
         end,
         ['m'] = function()
@@ -800,7 +800,7 @@ end
 
 -- 显示构建状态管理界面
 function M.show_build_manager()
-    local build_manager = require('qt.build_manager')
+    local build_manager = require('qt.build.build_manager')
     build_manager.show_build_status()
 end
 

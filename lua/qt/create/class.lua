@@ -2,9 +2,9 @@
 -- 核心功能模块
 
 local M = {}
-local file_manager = require('qt.file_manager')
-local templates = require('qt.templates')
-local cmake = require('qt.cmake')
+local file_manager = require('qt.core.file_manager')
+local templates = require('qt.create.templates')
+local cmake = require('qt.build.cmake')
 
 -- Validate class name format
 function M.validate_class_name(class_name)
@@ -29,7 +29,7 @@ function M.create_qt_class(class_name, class_type, options)
         return false, "Unknown class type: " .. class_type
     end
     
-    local system = require('qt.system')
+    local system = require('qt.core.system')
     local target_dirs = file_manager.determine_target_directories(class_type, options)
     
     -- Generate file content

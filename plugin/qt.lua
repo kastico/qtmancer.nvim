@@ -39,7 +39,7 @@ vim.api.nvim_create_user_command('QtNewProject', function(opts)
         local args = vim.split(opts.args, '%s+')
         if #args >= 3 then
             -- QtNewProject <name> <template> <cxx_standard> [tests|gtest]
-            local project_manager = require('qt.project_manager')
+            local project_manager = require('qt.create.project')
             local enable_tests = false
             local test_framework = nil
             if #args >= 4 then
@@ -56,11 +56,11 @@ vim.api.nvim_create_user_command('QtNewProject', function(opts)
         elseif #args >= 2 then
             -- QtNewProject <name> <template>
             -- Semi-interactive: still prompt for location/tests/C++ standard
-            local project_manager = require('qt.project_manager')
+            local project_manager = require('qt.create.project')
             project_manager.new_project_interactive_preset(args[1], args[2])
         else
             -- Interactive mode
-            local project_manager = require('qt.project_manager')
+            local project_manager = require('qt.create.project')
             project_manager.new_project_interactive()
         end
     end
@@ -116,9 +116,9 @@ vim.api.nvim_create_user_command('QtAddModule', function(opts)
                 test_framework = 'gtest'
             end
         end
-        require('qt.project_manager').add_module(args[1], args[2], nil, { enable_tests = enable_tests, test_framework = test_framework })
+        require('qt.create.project').add_module(args[1], args[2], nil, { enable_tests = enable_tests, test_framework = test_framework })
     else
-        require('qt.project_manager').add_module_interactive()
+        require('qt.create.project').add_module_interactive()
     end
 end, {
     nargs = '*',
@@ -129,7 +129,7 @@ end, {
             return {}
         elseif #args == 3 then
             -- Complete module type
-            local project_manager = require('qt.project_manager')
+            local project_manager = require('qt.create.project')
             return project_manager.get_available_module_types()
         elseif #args == 4 then
             return { 'tests', 'gtest' }
@@ -249,30 +249,30 @@ end, { desc = 'Package CMake project via CPack' })
 vim.api.nvim_create_user_command('QtCMakePresets', function(opts)
     if not ensure_loaded() then return end
     local generator = opts and opts.args ~= '' and opts.args or nil
-    require('qt.cmake').generate_cmake_presets(generator)
+    require('qt.build.cmake').generate_cmake_presets(generator)
 end, { desc = 'Generate CMakePresets.json for Qt project', nargs = '?' })
 
 vim.api.nvim_create_user_command('QtBuildPreset', function(opts)
     if not ensure_loaded() then return end
     local preset = opts.args ~= '' and opts.args or nil
-    require('qt.cmake').build_with_preset(preset)
+    require('qt.build.cmake').build_with_preset(preset)
 end, {
     desc = 'Build Qt project with CMake preset',
     nargs = '?',
     complete = function()
-        local cmake = require('qt.cmake')
+        local cmake = require('qt.build.cmake')
         return cmake.get_available_presets()
     end
 })
 
 vim.api.nvim_create_user_command('QtCMakeFormat', function()
     if not ensure_loaded() then return end
-    require('qt.cmake').format_cmake_file()
+    require('qt.build.cmake').format_cmake_file()
 end, { desc = 'Format CMakeLists.txt file' })
 
 vim.api.nvim_create_user_command('QtCMakeBackup', function()
     if not ensure_loaded() then return end
-    require('qt.cmake').backup_cmake_file()
+    require('qt.build.cmake').backup_cmake_file()
 end, { desc = 'Backup CMakeLists.txt file' })
 
 -- ==================== Debug Commands ====================
@@ -356,7 +356,7 @@ vim.api.nvim_create_user_command('QtDoctor', function()
     if not ensure_loaded() then return end
 
     local config = require('qt.config').get()
-    local system = require('qt.system')
+    local system = require('qt.core.system')
 
     local function fmt(v)
         if v == nil then return 'nil' end

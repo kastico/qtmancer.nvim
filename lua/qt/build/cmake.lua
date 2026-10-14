@@ -2,8 +2,8 @@
 -- CMake integration module
 
 local M = {}
-local file_manager = require('qt.file_manager')
-local system = require('qt.system')
+local file_manager = require('qt.core.file_manager')
+local system = require('qt.core.system')
 
 -- 获取插件配置
 local function get_config()
@@ -128,7 +128,7 @@ end
 
 -- 添加源文件到CMakeLists.txt
 function M.add_source_files(files)
-    local system = require('qt.system')
+    local system = require('qt.core.system')
     local config = get_config()
 
     -- 选择起始目录：优先使用新建文件所在目录（最近的CMakeLists）
@@ -755,7 +755,7 @@ function M.build_with_preset(preset_name)
     end
 
     local project_root = vim.fn.fnamemodify(cmake_file, ":h")
-    local system = require('qt.system')
+    local system = require('qt.core.system')
     local cmake_path = system.find_executable("cmake")
 
     if not cmake_path then
