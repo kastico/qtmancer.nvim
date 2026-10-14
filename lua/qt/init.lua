@@ -9,7 +9,7 @@ M._config = nil
 -- Initialize plugin
 function M.setup(user_config)
 	-- Use the dedicated config module for centralized configuration
-	local config = require('qt-assistant.config')
+	local config = require('qt.config')
 	M._config = config.setup(user_config or {})
 
 	-- Setup keymaps if enabled
@@ -19,7 +19,7 @@ function M.setup(user_config)
 	
 	-- Initialize debug integration (lazy)
 	vim.schedule(function()
-		local debug_ok, debug = pcall(require, 'qt-assistant.debug')
+		local debug_ok, debug = pcall(require, 'qt.debug')
 		if debug_ok then
 			debug.init()
 		end
@@ -30,7 +30,7 @@ end
 -- Get configuration
 function M.get_config()
 	if not M._config then
-		local config = require('qt-assistant.config')
+		local config = require('qt.config')
 		M._config = config.get()
 	end
 	return M._config
@@ -39,7 +39,7 @@ end
 -- Setup optimized keymaps for quick development
 function M.setup_keymaps()
 	local map = vim.keymap.set
-	local config = require('qt-assistant.config').get()
+	local config = require('qt.config').get()
 	local preset = (config.keymaps and config.keymaps.preset) or 'minimal'
 	preset = tostring(preset):lower()
 
@@ -62,7 +62,7 @@ function M.setup_keymaps()
 		if current_file:match("%.ui$") then
 			M.open_designer(current_file)
 		else
-			local designer = require("qt-assistant.designer")
+			local designer = require("qt.designer")
 			designer.select_ui_file_to_open()
 		end
 	end, { desc = "Edit Current/Select UI" })
@@ -124,7 +124,7 @@ end
 function M.quick_build_and_run()
 	vim.notify("🚀 Quick Build & Run...", vim.log.levels.INFO)
 	
-	local build_manager = require("qt-assistant.build_manager")
+	local build_manager = require("qt.build_manager")
 	
 	-- Build first, then run on success
 	vim.schedule(function()
@@ -163,7 +163,7 @@ function M.create_class_from_current_ui()
 	end
 	
 	-- Extract class name from UI file
-	local designer = require("qt-assistant.designer")
+	local designer = require("qt.designer")
 	local ui_info = designer.analyze_ui_file(current_file)
 	
 	if ui_info.class_name and ui_info.class_name ~= "" then
@@ -179,7 +179,7 @@ function M.find_and_open_ui()
 	local current_file = vim.fn.expand('%:p')
 	local base_name = vim.fn.fnamemodify(current_file, ":t:r")
 	
-	local designer = require("qt-assistant.designer")
+	local designer = require("qt.designer")
 	local ui_files = designer.find_ui_files()
 	
 	-- Look for matching UI file
@@ -197,7 +197,7 @@ end
 
 -- Show main interface
 function M.show_main_interface()
-	local ui = require("qt-assistant.ui")
+	local ui = require("qt.ui")
 	ui.show_main_interface()
 end
 
@@ -228,7 +228,7 @@ function M.new_project_interactive()
 				if not choice or not idx then
 					return
 				end
-				local project_manager = require('qt-assistant.project_manager')
+				local project_manager = require('qt.project_manager')
 				project_manager.new_project_interactive_preset(name, types[idx])
 			end)
 		end
@@ -248,8 +248,8 @@ function M.open_project_interactive()
 		end)
 	end
 
-	local history = require("qt-assistant.history")
-	local project_manager = require("qt-assistant.project_manager")
+	local history = require("qt.history")
+	local project_manager = require("qt.project_manager")
 
 	local recent = history.get_recent_projects()
 	local discovered = project_manager.discover_projects({ limit = 20 })
@@ -316,12 +316,12 @@ function M.open_project_interactive()
 end
 
 function M.new_project(name, template_type, root_dir)
-	local project_manager = require("qt-assistant.project_manager")
+	local project_manager = require("qt.project_manager")
 	project_manager.new_project(name, template_type, nil, root_dir)
 end
 
 function M.open_project(path)
-	local project_manager = require("qt-assistant.project_manager")
+	local project_manager = require("qt.project_manager")
 	return project_manager.open_project(path)
 end
 
@@ -332,7 +332,7 @@ function M.create_new_ui_interactive()
 			return
 		end
 
-		local default_dir = vim.fs.normalize(require('qt-assistant.config').get().project_root .. "/ui")
+		local default_dir = vim.fs.normalize(require('qt.config').get().project_root .. "/ui")
 		vim.ui.input({
 			prompt = 'Target directory for UI file:',
 			default = default_dir,
@@ -348,22 +348,22 @@ function M.create_new_ui_interactive()
 end
 
 function M.create_new_ui(filename, target_dir)
-	local designer = require("qt-assistant.designer")
+	local designer = require("qt.designer")
 	designer.create_new_ui(filename, target_dir)
 end
 
 function M.edit_ui_file(filename)
-	local designer = require("qt-assistant.designer")
+	local designer = require("qt.designer")
 	designer.edit_ui_file(filename)
 end
 
 function M.open_designer(ui_file)
-	local designer = require("qt-assistant.designer")
+	local designer = require("qt.designer")
 	designer.open_designer(ui_file)
 end
 
 function M.get_ui_files_for_completion()
-	local designer = require("qt-assistant.designer")
+	local designer = require("qt.designer")
 	return designer.get_ui_files_for_completion()
 end
 
@@ -409,7 +409,7 @@ function M.create_class(class_name, class_type, options)
 		return
 	end
 
-	local core = require("qt-assistant.core")
+	local core = require("qt.core")
 	local success, error_msg = core.create_qt_class(class_name, class_type, options or {})
 
 	if success then
@@ -420,12 +420,12 @@ function M.create_class(class_name, class_type, options)
 end
 
 function M.create_class_from_ui(ui_file, class_name)
-	local core = require("qt-assistant.core")
-	local designer = require("qt-assistant.designer")
+	local core = require("qt.core")
+	local designer = require("qt.designer")
 	
 	-- Find UI file
 	local project_root = M._config.project_root
-	local system = require('qt-assistant.system')
+	local system = require('qt.system')
 	
 	local ui_file_path = nil
 	if ui_file:match("^/") then
@@ -480,7 +480,7 @@ function M.create_class_from_ui(ui_file, class_name)
 		
 		-- Update CMakeLists.txt if enabled
 		if M._config.auto_update_cmake then
-			local cmake = require("qt-assistant.cmake")
+			local cmake = require("qt.cmake")
 			cmake.add_ui_file(ui_file_path)
 		end
 	else
@@ -492,28 +492,28 @@ end
 
 -- Build Management
 function M.build_project()
-	local build_manager = require("qt-assistant.build_manager")
+	local build_manager = require("qt.build_manager")
 	build_manager.build_project()
 end
 
 function M.run_project()
-	local build_manager = require("qt-assistant.build_manager")
+	local build_manager = require("qt.build_manager")
 	build_manager.run_project()
 end
 
 function M.install_project(prefix)
-	local build_manager = require("qt-assistant.build_manager")
+	local build_manager = require("qt.build_manager")
 	build_manager.install_project(prefix)
 end
 
 function M.package_project()
-	local build_manager = require("qt-assistant.build_manager")
+	local build_manager = require("qt.build_manager")
 	build_manager.package_project()
 end
 
 -- Debug Management
 function M.debug_application()
-	local debug_ok, debug = pcall(require, "qt-assistant.debug")
+	local debug_ok, debug = pcall(require, "qt.debug")
 	if debug_ok then
 		debug.debug_application()
 	else
@@ -522,7 +522,7 @@ function M.debug_application()
 end
 
 function M.attach_to_process()
-	local debug_ok, debug = pcall(require, "qt-assistant.debug")
+	local debug_ok, debug = pcall(require, "qt.debug")
 	if debug_ok then
 		debug.attach_to_process()
 	else
@@ -531,7 +531,7 @@ function M.attach_to_process()
 end
 
 function M.show_debug_status()
-	local debug_ok, debug = pcall(require, "qt-assistant.debug")
+	local debug_ok, debug = pcall(require, "qt.debug")
 	if debug_ok then
 		debug.show_debug_status()
 	else
@@ -562,8 +562,8 @@ end
 
 -- Compile UI file with uic (enhanced error handling)
 function M.compile_ui_file(ui_file_path)
-	local system = require('qt-assistant.system')
-	local file_manager = require('qt-assistant.file_manager')
+	local system = require('qt.system')
+	local file_manager = require('qt.file_manager')
 	
 	-- Validate input
 	if not ui_file_path or ui_file_path == "" then
@@ -675,7 +675,7 @@ end
 
 -- Show help
 function M.show_help()
-	local config = require('qt-assistant.config').get()
+	local config = require('qt.config').get()
 	local preset = (config.keymaps and config.keymaps.preset) or 'minimal'
 	preset = tostring(preset):lower()
 
@@ -806,7 +806,7 @@ function M.new_project_quick()
 		end
 
 		local target_root = dir_input ~= '' and vim.fs.normalize(dir_input) or base_dir
-		local project_manager = require('qt-assistant.project_manager')
+		local project_manager = require('qt.project_manager')
 		project_manager.new_project(project_name, "widget_app", "17", target_root)
 	end)
 end
@@ -820,7 +820,7 @@ function M.build_with_std(cxx_standard)
 		vim.fn.system(cmd)
 	else
 		-- Unix: use cmake directly
-		local build_manager = require('qt-assistant.build_manager')
+		local build_manager = require('qt.build_manager')
 		build_manager.build_project()
 		vim.notify(string.format("Building with C++%s...", cxx_standard), vim.log.levels.INFO)
 	end
@@ -936,9 +936,9 @@ end
 -- Generate project documentation
 -- 生成项目文档
 function M.generate_documentation(doc_type, output_file)
-	local templates = require('qt-assistant.templates')
+	local templates = require('qt.templates')
 	templates.init()
-	local file_manager = require('qt-assistant.file_manager')
+	local file_manager = require('qt.file_manager')
 	
 	doc_type = doc_type or "project_doc"
 	
@@ -975,7 +975,7 @@ function M.generate_documentation(doc_type, output_file)
 		local project_root = file_manager.get_project_root()
 		
 		-- Ensure docs directory exists
-		local doc_path = require('qt-assistant.system').join_path(project_root, doc_dir)
+		local doc_path = require('qt.system').join_path(project_root, doc_dir)
 		if vim.fn.isdirectory(doc_path) == 0 then
 			vim.fn.mkdir(doc_path, "p")
 		end
@@ -987,7 +987,7 @@ function M.generate_documentation(doc_type, output_file)
 			third_party_lib_doc = "THIRD_PARTY.md"
 		}
 		
-		output_file = require('qt-assistant.system').join_path(doc_path, filename_map[doc_type] or "README.md")
+		output_file = require('qt.system').join_path(doc_path, filename_map[doc_type] or "README.md")
 	end
 	
 	-- Write documentation
@@ -1046,7 +1046,7 @@ function M.add_third_party_library()
 					}
 					
 					-- Add to CMakeLists.txt
-					local cmake = require('qt-assistant.cmake')
+					local cmake = require('qt.cmake')
 					local success = cmake.add_third_party_library(lib_name, lib_config)
 					
 					if success then
@@ -1061,7 +1061,7 @@ end
 -- Create third-party CMake configuration file
 -- 创建第三方库CMake配置文件
 function M.create_third_party_cmake()
-	local cmake = require('qt-assistant.cmake')
+	local cmake = require('qt.cmake')
 	cmake.create_third_party_cmake_file()
 end
 

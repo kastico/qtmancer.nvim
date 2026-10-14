@@ -8,7 +8,7 @@ M._last_build_type = nil
 
 -- Get configuration
 local function get_config()
-    return require('qt-assistant.config').get()
+    return require('qt.config').get()
 end
 
 -- Detect build system
@@ -41,7 +41,7 @@ function M.build_project(build_type, opts)
         local build_dir = project_root .. "/build"
         
         -- Ensure build directory exists
-        local file_manager = require('qt-assistant.file_manager')
+        local file_manager = require('qt.file_manager')
         local success, error_msg = file_manager.ensure_directory_exists(build_dir)
         if not success then
             vim.notify("❌ Failed to create build directory: " .. error_msg, vim.log.levels.ERROR)
@@ -61,7 +61,7 @@ function M.build_project(build_type, opts)
 end
 
 local function ensure_dir(path)
-    local file_manager = require('qt-assistant.file_manager')
+    local file_manager = require('qt.file_manager')
     local ok, err = file_manager.ensure_directory_exists(path)
     return ok, err
 end
@@ -74,7 +74,7 @@ local function get_export_root(project_root)
 end
 
 local function run_qt_deploy_if_available(target_path, build_type)
-    local system = require('qt-assistant.system')
+    local system = require('qt.system')
     local cfg = get_config()
     if not (cfg.export and cfg.export.deploy_qt) then
         return true
@@ -97,7 +97,7 @@ local function run_qt_deploy_if_available(target_path, build_type)
         end
 
         local function fallback_copy_adjacent_dlls(export_exe_path, bt)
-            local file_manager = require('qt-assistant.file_manager')
+            local file_manager = require('qt.file_manager')
             local project_root = get_config().project_root
             local build_root = project_root .. '/build'
 
@@ -363,7 +363,7 @@ local function export_after_cmake_build(project_root, build_dir, build_type)
         return
     end
 
-    local system = require('qt-assistant.system')
+    local system = require('qt.system')
     local cmake_path = system.find_executable('cmake')
     if not cmake_path then
         vim.notify('❌ CMake not found. Cannot export build artifacts.', vim.log.levels.ERROR)
@@ -407,7 +407,7 @@ local function export_after_cmake_build(project_root, build_dir, build_type)
                 vim.notify('✅ Export completed', vim.log.levels.INFO)
 
                 -- Deploy Qt DLLs on Windows
-                local file_manager = require('qt-assistant.file_manager')
+                local file_manager = require('qt.file_manager')
                 local project_name = vim.fn.fnamemodify(project_root, ":t")
                 local bin_dir = export_root .. '/bin'
                 local exe_suffix = (system.get_os() == 'windows') and '.exe' or ''
@@ -474,7 +474,7 @@ function M.install_project(prefix)
             return
         end
 
-        local system = require('qt-assistant.system')
+        local system = require('qt.system')
         local cmake_path = system.find_executable("cmake")
         if not cmake_path then
             vim.notify("❌ CMake not found. Please install CMake.", vim.log.levels.ERROR)
@@ -531,7 +531,7 @@ function M.package_project()
         end
 
         if build_system == "cmake" then
-            local system = require('qt-assistant.system')
+            local system = require('qt.system')
             local cmake_path = system.find_executable("cmake")
             if not cmake_path then
                 vim.notify("❌ CMake not found. Please install CMake.", vim.log.levels.ERROR)
@@ -573,7 +573,7 @@ function M.package_project()
         end
 
         if build_system == "qmake" then
-            local system = require('qt-assistant.system')
+            local system = require('qt.system')
             local project_name = vim.fn.fnamemodify(project_root, ":t")
             local zip_path = build_dir .. "/" .. project_name .. ".zip"
 
@@ -662,7 +662,7 @@ end
 
 -- Build with CMake (async)
 function M.build_with_cmake_async(project_root, build_dir, build_type, opts)
-    local system = require('qt-assistant.system')
+    local system = require('qt.system')
     local cmake_path = system.find_executable("cmake")
     
     if not cmake_path then
@@ -682,7 +682,7 @@ function M.build_with_cmake_async(project_root, build_dir, build_type, opts)
     -- Add vcpkg toolchain file if enabled
     local config = get_config()
     if config.vcpkg and config.vcpkg.enabled then
-        local vcpkg_toolchain = require('qt-assistant.config').get_vcpkg_toolchain_file()
+        local vcpkg_toolchain = require('qt.config').get_vcpkg_toolchain_file()
         if vcpkg_toolchain then
             table.insert(configure_cmd, "-DCMAKE_TOOLCHAIN_FILE=" .. vcpkg_toolchain)
             vim.notify("🔧 Using vcpkg toolchain: " .. vcpkg_toolchain, vim.log.levels.INFO)
@@ -761,7 +761,7 @@ end
 
 -- Build with qmake (async)
 function M.build_with_qmake_async(project_root, build_dir, opts)
-    local system = require('qt-assistant.system')
+    local system = require('qt.system')
     local qmake_path = system.find_qt_tool("qmake")
     
     if not qmake_path then
@@ -800,7 +800,7 @@ end
 
 -- Start make build
 function M.start_make_build(project_root, build_dir)
-    local system = require('qt-assistant.system')
+    local system = require('qt.system')
     local make_tool = system.find_executable('mingw32-make')
         or system.find_executable('nmake')
         or system.find_executable('make')
@@ -837,7 +837,7 @@ function M.start_make_build(project_root, build_dir)
                         local src_exe = build_dir .. '/' .. project_name .. exe_suffix
                         local dst_exe = export_root .. '/bin/' .. project_name .. exe_suffix
 
-                        local file_manager = require('qt-assistant.file_manager')
+                        local file_manager = require('qt.file_manager')
                         if file_manager.file_exists(src_exe) then
                             file_manager.copy_file(src_exe, dst_exe)
                             vim.notify('📤 Exported executable to: ' .. dst_exe, vim.log.levels.INFO)
@@ -862,7 +862,7 @@ function M.run_project()
         
         -- Find executable
         local project_name = vim.fn.fnamemodify(project_root, ":t")
-        local system = require('qt-assistant.system')
+        local system = require('qt.system')
         local exe_name = project_name
         if system.get_os() == 'windows' then
             exe_name = exe_name .. ".exe"

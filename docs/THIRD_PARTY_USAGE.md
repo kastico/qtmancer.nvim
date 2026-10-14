@@ -16,7 +16,7 @@ Qt Assistant 现在支持：
 在你的 Neovim 配置中启用第三方库管理：
 
 ```lua
-require('qt-assistant').setup({
+require('qt').setup({
     third_party = {
         -- 启用第三方库管理
         enabled = true,
@@ -270,7 +270,7 @@ documentation = {
 
 ```lua
 -- 在配置中添加
-require('qt-assistant').setup({
+require('qt').setup({
     third_party = {
         enabled = true,
         libraries = {
@@ -324,7 +324,7 @@ nlohmann_json = {
 ### 示例4：完整项目配置
 
 ```lua
-require('qt-assistant').setup({
+require('qt').setup({
     project_root = vim.fn.getcwd(),
     
     third_party = {

@@ -3514,7 +3514,7 @@ find_package(spdlog REQUIRED)
 在使用Qt Assistant插件时，可以在配置中设置第三方库路径：
 
 ```lua
-require('qt-assistant').setup({
+require('qt').setup({
     third_party = {
         -- 启用第三方库管理
         enabled = true,

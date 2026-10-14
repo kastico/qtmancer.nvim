@@ -34,7 +34,7 @@ Qt Assistant 现在支持自动生成多种类型的项目文档：
 #### 配置示例
 
 ```lua
-require('qt-assistant').setup({
+require('qt').setup({
     third_party = {
         enabled = true,
         root_dir = "third_party",
@@ -78,7 +78,7 @@ require('qt-assistant').setup({
 在你的 Neovim 配置中：
 
 ```lua
-require('qt-assistant').setup({
+require('qt').setup({
     -- 启用第三方库管理
     third_party = {
         enabled = true,
@@ -224,7 +224,7 @@ target_link_libraries(your_app PRIVATE
 ### 完整配置示例
 
 ```lua
-require('qt-assistant').setup({
+require('qt').setup({
     project_root = vim.fn.getcwd(),
     
     -- 第三方库配置

@@ -2,7 +2,7 @@
 -- Copy this to your init.lua or put it in a separate file
 
 -- Basic setup
-require('qt-assistant').setup({
+require('qt').setup({
     -- Project settings
     project_root = vim.fn.getcwd(),
     

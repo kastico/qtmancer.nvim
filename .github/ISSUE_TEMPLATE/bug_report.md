@@ -46,8 +46,8 @@ Please provide your Qt Assistant configuration:
 请提供您的Qt Assistant配置：
 
 ```lua
--- Your qt-assistant setup configuration
--- 您的qt-assistant设置配置
+-- Your qt setup configuration
+-- 您的qt设置配置
 ```
 
 ## 🔍 Error Messages / 错误消息

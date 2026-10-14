@@ -14,10 +14,10 @@ vim.g.loaded_qt_assistant = 1
 
 -- Lazy loading helper with error handling
 local function ensure_loaded()
-    if not package.loaded['qt-assistant'] then
-        local ok, qt_assistant = pcall(require, 'qt-assistant')
+    if not package.loaded['qt'] then
+        local ok, qt_assistant = pcall(require, 'qt')
         if not ok then
-            vim.notify('Failed to load qt-assistant: ' .. qt_assistant, vim.log.levels.ERROR)
+            vim.notify('Failed to load qt: ' .. qt_assistant, vim.log.levels.ERROR)
             return false
         end
     end
@@ -29,7 +29,7 @@ end
 -- Main interface
 vim.api.nvim_create_user_command('QtAssistant', function()
     if ensure_loaded() then
-        require('qt-assistant').show_main_interface()
+        require('qt').show_main_interface()
     end
 end, { desc = 'Open Qt Assistant interface' })
 
@@ -39,7 +39,7 @@ vim.api.nvim_create_user_command('QtNewProject', function(opts)
         local args = vim.split(opts.args, '%s+')
         if #args >= 3 then
             -- QtNewProject <name> <template> <cxx_standard> [tests|gtest]
-            local project_manager = require('qt-assistant.project_manager')
+            local project_manager = require('qt.project_manager')
             local enable_tests = false
             local test_framework = nil
             if #args >= 4 then
@@ -56,11 +56,11 @@ vim.api.nvim_create_user_command('QtNewProject', function(opts)
         elseif #args >= 2 then
             -- QtNewProject <name> <template>
             -- Semi-interactive: still prompt for location/tests/C++ standard
-            local project_manager = require('qt-assistant.project_manager')
+            local project_manager = require('qt.project_manager')
             project_manager.new_project_interactive_preset(args[1], args[2])
         else
             -- Interactive mode
-            local project_manager = require('qt-assistant.project_manager')
+            local project_manager = require('qt.project_manager')
             project_manager.new_project_interactive()
         end
     end
@@ -87,9 +87,9 @@ end, {
 vim.api.nvim_create_user_command('QtOpenProject', function(opts)
     if not ensure_loaded() then return end
     if opts.args ~= '' then
-        require('qt-assistant').open_project(opts.args)
+        require('qt').open_project(opts.args)
     else
-        require('qt-assistant').open_project_interactive()
+        require('qt').open_project_interactive()
     end
 end, {
     nargs = '?',
@@ -116,9 +116,9 @@ vim.api.nvim_create_user_command('QtAddModule', function(opts)
                 test_framework = 'gtest'
             end
         end
-        require('qt-assistant.project_manager').add_module(args[1], args[2], nil, { enable_tests = enable_tests, test_framework = test_framework })
+        require('qt.project_manager').add_module(args[1], args[2], nil, { enable_tests = enable_tests, test_framework = test_framework })
     else
-        require('qt-assistant.project_manager').add_module_interactive()
+        require('qt.project_manager').add_module_interactive()
     end
 end, {
     nargs = '*',
@@ -129,7 +129,7 @@ end, {
             return {}
         elseif #args == 3 then
             -- Complete module type
-            local project_manager = require('qt-assistant.project_manager')
+            local project_manager = require('qt.project_manager')
             return project_manager.get_available_module_types()
         elseif #args == 4 then
             return { 'tests', 'gtest' }
@@ -144,9 +144,9 @@ end, {
 vim.api.nvim_create_user_command('QtNewUi', function(opts)
     if not ensure_loaded() then return end
     if opts.args ~= '' then
-        require('qt-assistant').create_new_ui(opts.args)
+        require('qt').create_new_ui(opts.args)
     else
-        require('qt-assistant').create_new_ui_interactive()
+        require('qt').create_new_ui_interactive()
     end
 end, { 
     nargs = '?',
@@ -156,9 +156,9 @@ end, {
 vim.api.nvim_create_user_command('QtEditUi', function(opts)
     if not ensure_loaded() then return end
     if opts.args ~= '' then
-        require('qt-assistant').edit_ui_file(opts.args)
+        require('qt').edit_ui_file(opts.args)
     else
-        local designer = require("qt-assistant.designer")
+        local designer = require("qt.designer")
         designer.select_ui_file_to_open()
     end
 end, { 
@@ -166,7 +166,7 @@ end, {
     desc = 'Edit existing UI file with Qt Designer',
     complete = function()
         pcall(ensure_loaded)
-        local ok, qt_assistant = pcall(require, 'qt-assistant')
+        local ok, qt_assistant = pcall(require, 'qt')
         if ok then
             return qt_assistant.get_ui_files_for_completion()
         end
@@ -176,7 +176,7 @@ end, {
 
 vim.api.nvim_create_user_command('QtDesigner', function(opts)
     if not ensure_loaded() then return end
-    require('qt-assistant').open_designer(opts.args ~= '' and opts.args or nil)
+    require('qt').open_designer(opts.args ~= '' and opts.args or nil)
 end, { 
     nargs = '?',
     desc = 'Open Qt Designer',
@@ -191,13 +191,13 @@ vim.api.nvim_create_user_command('QtCreateClass', function(opts)
     if #args >= 2 then
         if #args >= 3 and args[3]:match("%.ui$") then
             -- From UI file: QtCreateClass <ClassName> <ClassType> <UIFile>
-            require('qt-assistant').create_class_from_ui(args[3], args[1])
+            require('qt').create_class_from_ui(args[3], args[1])
         else
             -- Regular class creation
-            require('qt-assistant').create_class(args[1], args[2])
+            require('qt').create_class(args[1], args[2])
         end
     else
-        require('qt-assistant').create_class_interactive()
+        require('qt').create_class_interactive()
     end
 end, { 
     nargs = '*',
@@ -208,7 +208,7 @@ end, {
             return {'main_window', 'dialog', 'widget', 'model', 'delegate', 'thread', 'utility', 'singleton'}
         elseif #args == 3 then
             pcall(ensure_loaded)
-            local ok, qt_assistant = pcall(require, 'qt-assistant')
+            local ok, qt_assistant = pcall(require, 'qt')
             if ok then
                 return qt_assistant.get_ui_files_for_completion()
             end
@@ -221,18 +221,18 @@ end, {
 
 vim.api.nvim_create_user_command('QtBuild', function()
     if not ensure_loaded() then return end
-    require('qt-assistant').build_project()
+    require('qt').build_project()
 end, { desc = 'Build Qt project' })
 
 vim.api.nvim_create_user_command('QtRun', function()
     if not ensure_loaded() then return end
-    require('qt-assistant').run_project()
+    require('qt').run_project()
 end, { desc = 'Run Qt project' })
 
 vim.api.nvim_create_user_command('QtInstall', function(opts)
     if not ensure_loaded() then return end
     local prefix = opts.args ~= '' and opts.args or nil
-    require('qt-assistant').install_project(prefix)
+    require('qt').install_project(prefix)
 end, {
     nargs = '?',
     desc = 'Install CMake project (optional prefix)',
@@ -241,7 +241,7 @@ end, {
 
 vim.api.nvim_create_user_command('QtPackage', function()
     if not ensure_loaded() then return end
-    require('qt-assistant').package_project()
+    require('qt').package_project()
 end, { desc = 'Package CMake project via CPack' })
 
 -- ==================== CMake Commands ====================
@@ -249,59 +249,59 @@ end, { desc = 'Package CMake project via CPack' })
 vim.api.nvim_create_user_command('QtCMakePresets', function(opts)
     if not ensure_loaded() then return end
     local generator = opts and opts.args ~= '' and opts.args or nil
-    require('qt-assistant.cmake').generate_cmake_presets(generator)
+    require('qt.cmake').generate_cmake_presets(generator)
 end, { desc = 'Generate CMakePresets.json for Qt project', nargs = '?' })
 
 vim.api.nvim_create_user_command('QtBuildPreset', function(opts)
     if not ensure_loaded() then return end
     local preset = opts.args ~= '' and opts.args or nil
-    require('qt-assistant.cmake').build_with_preset(preset)
+    require('qt.cmake').build_with_preset(preset)
 end, {
     desc = 'Build Qt project with CMake preset',
     nargs = '?',
     complete = function()
-        local cmake = require('qt-assistant.cmake')
+        local cmake = require('qt.cmake')
         return cmake.get_available_presets()
     end
 })
 
 vim.api.nvim_create_user_command('QtCMakeFormat', function()
     if not ensure_loaded() then return end
-    require('qt-assistant.cmake').format_cmake_file()
+    require('qt.cmake').format_cmake_file()
 end, { desc = 'Format CMakeLists.txt file' })
 
 vim.api.nvim_create_user_command('QtCMakeBackup', function()
     if not ensure_loaded() then return end
-    require('qt-assistant.cmake').backup_cmake_file()
+    require('qt.cmake').backup_cmake_file()
 end, { desc = 'Backup CMakeLists.txt file' })
 
 -- ==================== Debug Commands ====================
 
 vim.api.nvim_create_user_command('QtDebug', function()
     if not ensure_loaded() then return end
-    require('qt-assistant').debug_application()
+    require('qt').debug_application()
 end, { desc = 'Debug Qt application with nvim-dap' })
 
 vim.api.nvim_create_user_command('QtDebugAttach', function()
     if not ensure_loaded() then return end
-    require('qt-assistant').attach_to_process()
+    require('qt').attach_to_process()
 end, { desc = 'Attach debugger to running Qt process' })
 
 vim.api.nvim_create_user_command('QtDebugStatus', function()
     if not ensure_loaded() then return end
-    require('qt-assistant').show_debug_status()
+    require('qt').show_debug_status()
 end, { desc = 'Show Qt debug configuration status' })
 
 vim.api.nvim_create_user_command('QtDebugSetup', function()
     if not ensure_loaded() then return end
-    require('qt-assistant.debug').setup_debugging()
+    require('qt.debug').setup_debugging()
 end, { desc = 'Setup complete Qt debugging environment' })
 
 -- ==================== Help ====================
 
 vim.api.nvim_create_user_command('QtHelp', function()
     if not ensure_loaded() then return end
-    require('qt-assistant').show_help()
+    require('qt').show_help()
 end, { desc = 'Show Qt Assistant help' })
 
 -- ==================== Documentation ====================
@@ -311,7 +311,7 @@ vim.api.nvim_create_user_command('QtGenerateDoc', function(opts)
     local args = vim.split(opts.args, '%s+')
     local doc_type = args[1] or "project_doc"
     local output_file = args[2]
-    require('qt-assistant').generate_documentation(doc_type, output_file)
+    require('qt').generate_documentation(doc_type, output_file)
 end, {
     nargs = '*',
     desc = 'Generate documentation [type] [output_file]',
@@ -332,17 +332,17 @@ end, {
 
 vim.api.nvim_create_user_command('QtAddThirdParty', function()
     if not ensure_loaded() then return end
-    require('qt-assistant').add_third_party_library()
+    require('qt').add_third_party_library()
 end, { desc = 'Add third-party library configuration' })
 
 vim.api.nvim_create_user_command('QtCreateThirdPartyCMake', function()
     if not ensure_loaded() then return end
-    require('qt-assistant').create_third_party_cmake()
+    require('qt').create_third_party_cmake()
 end, { desc = 'Create third-party CMake configuration file' })
 
 vim.api.nvim_create_user_command('QtThirdPartyDoc', function()
     if not ensure_loaded() then return end
-    require('qt-assistant').generate_third_party_doc()
+    require('qt').generate_third_party_doc()
 end, { desc = 'Generate third-party library integration documentation' })
 
 -- ==================== Diagnostics ====================
@@ -350,8 +350,8 @@ end, { desc = 'Generate third-party library integration documentation' })
 vim.api.nvim_create_user_command('QtDoctor', function()
     if not ensure_loaded() then return end
 
-    local config = require('qt-assistant.config').get()
-    local system = require('qt-assistant.system')
+    local config = require('qt.config').get()
+    local system = require('qt.system')
 
     local function fmt(v)
         if v == nil then return 'nil' end
@@ -362,7 +362,7 @@ vim.api.nvim_create_user_command('QtDoctor', function()
 
     local vcpkg_root = config.vcpkg and config.vcpkg.vcpkg_root or nil
     local vcpkg_enabled = config.vcpkg and config.vcpkg.enabled or false
-    local toolchain = require('qt-assistant.config').get_vcpkg_toolchain_file()
+    local toolchain = require('qt.config').get_vcpkg_toolchain_file()
 
     vim.notify('QtDoctor: os=' .. fmt(system.get_os()), vim.log.levels.INFO)
     vim.notify('QtDoctor: vcpkg.enabled=' .. fmt(vcpkg_enabled), vim.log.levels.INFO)
@@ -391,10 +391,10 @@ local function lazy_init()
     if initialized then
         return true
     end
-    local ok, qt_assistant = pcall(require, 'qt-assistant')
+    local ok, qt_assistant = pcall(require, 'qt')
     if ok and qt_assistant.setup then
         -- Do not overwrite user configuration. Only auto-setup if not already configured.
-        local cfg = require('qt-assistant.config')
+        local cfg = require('qt.config')
         if not cfg._config then
             qt_assistant.setup({})
         end

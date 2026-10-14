@@ -5,7 +5,7 @@ local M = {}
 
 -- 获取插件配置
 local function get_config()
-    return require('qt-assistant.config').get()
+    return require('qt.config').get()
 end
 
 -- 显示主界面
@@ -79,11 +79,11 @@ function M.show_main_interface()
         -- 项目管理
         ['p'] = function()
             vim.api.nvim_win_close(win, true)
-            require('qt-assistant.project_manager').new_project_interactive()
+            require('qt.project_manager').new_project_interactive()
         end,
         ['P'] = function()
             vim.api.nvim_win_close(win, true)
-            require('qt-assistant').new_project_quick()
+            require('qt').new_project_quick()
         end,
         ['o'] = function()
             vim.api.nvim_win_close(win, true)
@@ -101,25 +101,25 @@ function M.show_main_interface()
         end,
         ['q'] = function()
             vim.api.nvim_win_close(win, true)
-            require('qt-assistant').quick_build_and_run()
+            require('qt').quick_build_and_run()
         end,
         
         -- C++标准构建
         ['1'] = function()
             vim.api.nvim_win_close(win, true)
-            require('qt-assistant').build_with_std('11')
+            require('qt').build_with_std('11')
         end,
         ['4'] = function()
             vim.api.nvim_win_close(win, true)
-            require('qt-assistant').build_with_std('14')
+            require('qt').build_with_std('14')
         end,
         ['7'] = function()
             vim.api.nvim_win_close(win, true)
-            require('qt-assistant').build_with_std('17')
+            require('qt').build_with_std('17')
         end,
         ['2'] = function()
             vim.api.nvim_win_close(win, true)
-            require('qt-assistant').build_with_std('20')
+            require('qt').build_with_std('20')
         end,
         
         -- UI和类
@@ -129,7 +129,7 @@ function M.show_main_interface()
         end,
         ['u'] = function()
             vim.api.nvim_win_close(win, true)
-            require('qt-assistant').create_new_ui_interactive()
+            require('qt').create_new_ui_interactive()
         end,
         ['c'] = function()
             vim.api.nvim_win_close(win, true)
@@ -139,21 +139,21 @@ function M.show_main_interface()
         -- 配置
         ['s'] = function()
             vim.api.nvim_win_close(win, true)
-            require('qt-assistant').show_current_config()
+            require('qt').show_current_config()
         end,
         ['t'] = function()
             vim.api.nvim_win_close(win, true)
-            require('qt-assistant').select_cxx_standard()
+            require('qt').select_cxx_standard()
         end,
         ['R'] = function()
             vim.api.nvim_win_close(win, true)
-            require('qt-assistant').reconfigure_project()
+            require('qt').reconfigure_project()
         end,
         
         -- 帮助
         ['h'] = function()
             vim.api.nvim_win_close(win, true)
-            require('qt-assistant').show_help()
+            require('qt').show_help()
         end,
     }
     
@@ -495,9 +495,9 @@ function M.create_class_with_options(class_name, class_type, options)
     vim.notify("Creating " .. class_type .. " class: " .. class_name, vim.log.levels.INFO)
     
     -- 延迟加载core模块以避免循环依赖
-    local ok, core = pcall(require, 'qt-assistant.core')
+    local ok, core = pcall(require, 'qt.core')
     if not ok then
-        vim.notify('Error loading qt-assistant.core: ' .. tostring(core), vim.log.levels.ERROR)
+        vim.notify('Error loading qt.core: ' .. tostring(core), vim.log.levels.ERROR)
         return
     end
     
@@ -521,8 +521,8 @@ end
 
 -- 打开创建的文件
 function M.open_created_files(class_name, class_type, options)
-    local file_manager = require('qt-assistant.file_manager')
-    local system = require('qt-assistant.system')
+    local file_manager = require('qt.file_manager')
+    local system = require('qt.system')
     local target_dirs = file_manager.determine_target_directories(class_type, options)
     local filename = file_manager.class_name_to_filename(class_name)
     
@@ -562,7 +562,7 @@ end
 
 -- 显示项目脚本管理器
 function M.show_script_manager()
-    local scripts = require('qt-assistant.scripts')
+    local scripts = require('qt.scripts')
     local available_scripts = scripts.get_available_scripts()
     
     local menu_items = {}
@@ -649,7 +649,7 @@ end
 
 -- 显示脚本选项
 function M.show_script_options(script_name)
-    local scripts = require('qt-assistant.scripts')
+    local scripts = require('qt.scripts')
     
     vim.ui.select({'Run in background', 'Run in terminal', 'Edit script'}, {
         prompt = 'Choose action for ' .. script_name .. ':'
@@ -666,7 +666,7 @@ end
 
 -- 显示项目管理界面
 function M.show_project_manager()
-    local project_manager = require('qt-assistant.project_manager')
+    local project_manager = require('qt.project_manager')
     local current_project = project_manager.get_current_project()
     
     local menu_items = {}
@@ -730,7 +730,7 @@ function M.show_project_manager()
     local actions = {
         ['1'] = function()
             close_window()
-            require('qt-assistant').open_project_interactive()
+            require('qt').open_project_interactive()
         end,
         ['2'] = function()
             close_window()
@@ -760,17 +760,17 @@ function M.show_project_manager()
         end,
         ['4'] = function()
             close_window()
-            local build_manager = require('qt-assistant.build_manager')
+            local build_manager = require('qt.build_manager')
             build_manager.build_project()
         end,
         ['5'] = function()
             close_window()
-            local build_manager = require('qt-assistant.build_manager')
+            local build_manager = require('qt.build_manager')
             build_manager.run_project()
         end,
         ['6'] = function()
             close_window()
-            local build_manager = require('qt-assistant.build_manager')
+            local build_manager = require('qt.build_manager')
             build_manager.clean_project()
         end,
         ['m'] = function()
@@ -794,7 +794,7 @@ end
 
 -- 显示UI设计师管理界面
 function M.show_designer_manager()
-    local designer = require('qt-assistant.designer')
+    local designer = require('qt.designer')
     local ui_files = designer.find_ui_files()
     local editor_status = designer.get_editor_status()
     
@@ -904,7 +904,7 @@ end
 
 -- 显示构建状态管理界面
 function M.show_build_manager()
-    local build_manager = require('qt-assistant.build_manager')
+    local build_manager = require('qt.build_manager')
     build_manager.show_build_status()
 end
 
@@ -989,7 +989,7 @@ function M.show_help()
         "",
         "Configuration:",
         "  The plugin can be configured in your init.lua:",
-        "  require('qt-assistant').setup({",
+        "  require('qt').setup({",
         "    project_root = vim.fn.getcwd(),",
         "    naming_convention = 'snake_case',",
         "    auto_update_cmake = true",

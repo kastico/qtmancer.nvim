@@ -5,7 +5,7 @@ param(
 $ErrorActionPreference = 'Stop'
 
 function Write-Step($msg) {
-    Write-Host "[qt-assistant smoke] $msg"
+    Write-Host "[qt smoke] $msg"
 }
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -16,7 +16,7 @@ if (-not (Get-Command nvim -ErrorAction SilentlyContinue)) {
 
 if ([string]::IsNullOrWhiteSpace($OutDir)) {
     $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-    $OutDir = Join-Path $env:TEMP "qt-assistant-smoke-$stamp"
+    $OutDir = Join-Path $env:TEMP "qt-smoke-$stamp"
 }
 
 $OutDir = (Resolve-Path -LiteralPath (New-Item -ItemType Directory -Force -Path $OutDir).FullName).Path
@@ -29,7 +29,7 @@ Write-Step "Output: $OutDir"
 Push-Location $repoRoot
 try {
     $lua = @"
-local pm = require('qt-assistant.project_manager')
+local pm = require('qt.project_manager')
 local root = [[$luaRoot]]
 
 pm.new_project('SmokeProject', 'multi_project', '17', root, { enable_tests = false })
