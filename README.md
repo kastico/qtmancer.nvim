@@ -4,8 +4,6 @@
 
 A Neovim plugin for Qt C++ and QML development: project tooling, Qt Designer integration, build/debug helpers and offline Qt documentation, without leaving the editor.
 
-**Why "Mancer"?** Qt + *-mancer*, as in necromancer or pyromancer: someone who works magic through a craft. Here the craft is summoning projects, classes, UIs and documentation with a few keystrokes.
-
 > **Fork notice.** qtmancer.nvim is a fork of [2774326573/qt-assistant.nvim](https://github.com/2774326573/qt-assistant.nvim). The project management, UI Designer, class generation, build and debug tooling comes from the original project, and credit for that work goes to its author. This fork restructures the code base and adds a Qt documentation viewer with QML-aware lookup.
 
 ## Features
